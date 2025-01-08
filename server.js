@@ -33,7 +33,7 @@ app.use(
   })
 );
 
-// set static root path
+//  set static root path
 app.use(express.static("."));
 
 // graphql tạo api (nếu ko dùng RES HTTP)

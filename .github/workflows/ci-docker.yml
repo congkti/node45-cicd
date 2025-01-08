@@ -25,3 +25,7 @@ jobs:
 
       - name: push image lên docker hub
         run: docker push congkti/img-be_cyber_media:latest
+#################################################
+# Đưa source code lên github
+# Vào tab Settings > Secrets and variables > Action
+# để tạo biến môi trường cho password docker hub: secrets.PASS_DOCKER
