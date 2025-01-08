@@ -1,0 +1,27 @@
+# 1. Đặt tên
+name: CI docker
+
+# 2. Khi nào chạy
+on:
+  push:
+    branches: ["master"]
+
+# 3. Chạy công việc gì
+jobs:
+  # build =  tên gì cũng đc
+  build:
+    runs-on: ubuntu-latest
+    # ubuntu server build của github, sau khi build sẽ xóa server
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Đăng nhập docker
+        run: docker login -u congkti -p ${{secrets.PASS_DOCKER}}
+        # -u: username dockerhub / -p là pw dockerhub được lấy từ biên env của GitHub-> ko nên nhập trực tiếp mà phải lấy từ env của github
+
+      - name: build image
+        run: docker build . -t congkti/img-be_cyber_media:latest
+        # thông tin của dockerhub, đúng tên image trên dockerhub
+
+      - name: push image lên docker hub
+        run: docker push congkti/img-be_cyber_media:latest
