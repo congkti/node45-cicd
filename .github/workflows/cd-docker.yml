@@ -1,0 +1,51 @@
+# 1. Đặt tên
+name: CD docker
+
+# 2. Khi nào chạy
+on:
+  workflow_run:
+    workflows: ["CI docker"]
+    types:
+      - completed
+# 3. Chạy công việc gì
+jobs:
+  build:
+    runs-on: node_46
+
+    steps:
+      - name: Xóa file .env
+        run: sudo rm -f .env
+
+      - name: Tạo file .env mới
+        run: |
+          echo "DATABASE_URL=mysql://root:1234@some-mysql-compose:3306/db_cyber_media" >> .env
+          echo "ACCESS_TOKEN_SECRET = ACCESSTOKEN_KHOA_BI_MAT" >> .env
+          echo "ACCESS_TOKEN_EXPIRES = 10m" >> .env
+          echo "REFRESH_TOKEN_SECRET = REFRESHTOKEN_KHOA_BI_MAT" >> .env
+          echo "REFRESH_TOKEN_EXPIRES = 7d" >> .env
+        # Dấu | để biểu thị còn nội dung bên dưới
+
+      - name: Dừng và xóa container BE
+        run: |
+          sudo docker container stop cons-be_cyber_media || true
+          sudo docker container remove cons-be_cyber_media || true
+
+      - name: Xóa image BE cũ
+        run: sudo docker image remove congkti/img-be_cyber_media:latest
+
+      - name: Chạy lại Docker compose
+        run: docker compose up -d
+######################### LƯU Ý ########################
+# 1. Cần kích hoạt biến .env bên "docker-compose.yml" (environment) để nạp .env vào image khi kéo về
+# docker-compose có cơ chế đọc đc file .env
+# 2. Cần cài 1 tín hiệu để github gửi tới tới server: dùng Runner
+#       -> Trên GitHub: Vào Setting > Action > Runners
+#       -> Runner = Người Chạy = Thiết lập đối tượng bắt tới server
+#       -> Chọn "New self-hosted runner" để tạp mới runner
+#       -> Chọn Linux | x64
+#       -> Xóa thư mục app trên server:  rmdir app   -> chỉ còn lại thư mục /home/
+#       -> Tại /home trên server, chạy lần lượt các lệnh mục Download, Configure (trừ lệnh cuối cùng ko chạy) runner như hướng dẫn
+#       -> Lệnh cuối cùng trong Configure (./run.sh) ko chạy, vì sẽ chiếm dụng terminal => thay bằng cách khác:
+#           --> trong server chạy 2 lệnh:  sudo ./svc.sh install  VÀ  sudo ./svc.sh start
+
+#  3. Quay lại reload Runners sẽ thấy một runner đc tạo ra có label "node_46" dùng để liên lạc với server
